@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+
+# Environment variables file
+.env
+.env.*
+
+# TypeScript build output
+dist/
+
+# Log files
+*.log
+
+# Visual Studio Code specific files
+.vscode/
+*.code-workspace
+
+# macOS specific files
+.DS_Store
+
+
