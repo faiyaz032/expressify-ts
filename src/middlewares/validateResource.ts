@@ -1,13 +1,8 @@
 // middleware/validateResource.ts
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { AnyZodObject, ZodRawShape, ZodType } from 'zod';
+import { AnyZodObject } from 'zod';
 import CustomError from '../shared/error-handling/CustomError';
-
-// Define a utility type to infer the schema type
-type ZodSchemaType<T extends AnyZodObject | undefined> = T extends ZodType<infer U>
-  ? U
-  : ZodRawShape;
 
 interface ValidationSchemas {
   body?: AnyZodObject;
@@ -16,11 +11,10 @@ interface ValidationSchemas {
 }
 
 // Utility function to validate a request using Zod
-export default function validateResource<T extends ValidationSchemas>(schemas: T) {
+export default function validateResource(schemas: ValidationSchemas) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (schemas.body) {
-      const result = schemas.body.safeParse(req.body as ZodSchemaType<T['body']>);
-
+      const result = schemas.body.safeParse(req.body);
       if (!result.success) {
         const errorMessages = result.error.errors.map((e) => ({
           field: e.path.join('.'),
@@ -31,6 +25,7 @@ export default function validateResource<T extends ValidationSchemas>(schemas: T
           new CustomError(StatusCodes.UNPROCESSABLE_ENTITY, JSON.stringify(errorMessages))
         );
       }
+      req.body = result.data;
     }
 
     if (schemas.query) {
@@ -43,6 +38,7 @@ export default function validateResource<T extends ValidationSchemas>(schemas: T
         }));
         return next(new CustomError(StatusCodes.BAD_REQUEST, JSON.stringify(errorMessages)));
       }
+      req.query = result.data;
     }
 
     if (schemas.params) {
@@ -55,6 +51,7 @@ export default function validateResource<T extends ValidationSchemas>(schemas: T
         }));
         return next(new CustomError(StatusCodes.BAD_REQUEST, JSON.stringify(errorMessages)));
       }
+      req.params = result.data;
     }
 
     next();
