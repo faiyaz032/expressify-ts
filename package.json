@@ -15,7 +15,8 @@
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",
     "uuid": "^10.0.0",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

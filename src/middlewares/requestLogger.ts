@@ -8,7 +8,7 @@ export default function requestLogger(req: Request, res: Response, next: NextFun
   const start = Date.now();
 
   // Log request details including method, URL, and headers
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV?.trim() === 'production') {
     logger.info(`Request: ${req.method} ${req.originalUrl}`);
     logger.info('Request Headers:', req.headers);
   }

@@ -4,6 +4,7 @@ import addRequestId from '../middlewares/addRequestId';
 import globalErrorHandler from '../middlewares/globalErrorHandler';
 import notFoundHandler from '../middlewares/notFoundHandler';
 import requestLogger from '../middlewares/requestLogger';
+import loadAllModules from '../modules';
 import logger from '../shared/logger/LoggerManager';
 import sendResponse from '../shared/utils/sendResponse';
 
@@ -23,8 +24,8 @@ class AppFactory {
     });
 
     const router = express.Router();
-    //Initialize modules here
-    router.use('/api/v1/', router);
+    loadAllModules(router);
+    app.use('/api/v1', router);
 
     app.all('*', notFoundHandler);
     globalErrorHandler(app);
