@@ -6,9 +6,11 @@ class AuthController {
   constructor() {}
 
   async loginHandler(req: Request, res: Response, next: NextFunction) {
-    console.log('🚀 ~ AuthController ~ loginHandler ~ req.body:', req.body);
-
-    sendResponse(res, StatusCodes.OK, 'User Logged in successfully');
+    try {
+      sendResponse(res, StatusCodes.OK, 'User Logged in successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
