@@ -1,5 +1,6 @@
 import { Application } from 'express';
 import { Server as HTTPServer } from 'http';
+import config from '../configs';
 import AppErrorHandler from '../shared/error-handling';
 import logger from '../shared/logger/LoggerManager';
 import AppFactory from './app'; // Assuming './app' exports an object with a method `createApp`
@@ -45,7 +46,7 @@ class Server {
       // Configure socket
       //const httpServer = http.createServer(expressApp);
       this.connection = expressApp.listen(PORT, () => {
-        logger.info('Configuring server...');
+        logger.info(`Configuring ${config.get('environment')} server...`);
         const errorHandler = new AppErrorHandler();
         errorHandler.listenToErrorEvents(this.connection as HTTPServer);
         resolve(this.connection?.address());

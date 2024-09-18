@@ -1,25 +1,37 @@
 {
-  "name": "expressify-ts",
+  "name": "cine_booking_backend",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "set NODE_ENV=production&&node ./dist/src/index.js",
+    "staging": "set NODE_ENV=staging&&node ./dist/src/index.js",
     "build": "tsc --build",
-    "dev": "ts-node-dev --respawn --transpile-only ./src/index.ts"
+    "dev": "set NODE_ENV=development&&ts-node-dev ./src/index.ts"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "config": "^3.3.12",
     "dayjs": "^1.11.11",
+    "dotenv": "^16.4.5",
+    "dotenv-flow": "^4.1.0",
     "express": "^4.19.2",
     "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",
+    "postgres": "^3.4.4",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
     "uuid": "^10.0.0",
-    "winston": "^3.13.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/config": "^3.3.4",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/uuid": "^9.0.8",
     "@types/winston": "^2.4.4",

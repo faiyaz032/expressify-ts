@@ -12,16 +12,19 @@ interface ValidationSchemas {
 // Utility function to validate a request using Zod
 export default function validateResource(schemas: ValidationSchemas) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const errorMessages: Array<{ fields: string; message: string; location: string }> = [];
+    const errorDetails: Array<{ field: string; message: string; location: string }> = [];
+
+    let statusCode = StatusCodes.BAD_REQUEST; // Default status code
 
     if (schemas.body) {
       const result = schemas.body.safeParse(req.body);
       if (!result.success) {
-        errorMessages.push(
+        statusCode = StatusCodes.UNPROCESSABLE_ENTITY; // Set status code for body validation failure
+        errorDetails.push(
           ...result.error.errors.map((e) => ({
-            fields: e.path.join('.'),
-            message: e.message,
+            field: e.path.join('.'),
             location: 'body',
+            message: e.message,
           }))
         );
       }
@@ -30,11 +33,11 @@ export default function validateResource(schemas: ValidationSchemas) {
     if (schemas.query) {
       const result = schemas.query.safeParse(req.query);
       if (!result.success) {
-        errorMessages.push(
+        errorDetails.push(
           ...result.error.errors.map((e) => ({
-            fields: e.path.join('.'),
-            message: e.message,
+            field: e.path.join('.'),
             location: 'query',
+            message: e.message,
           }))
         );
       }
@@ -43,18 +46,18 @@ export default function validateResource(schemas: ValidationSchemas) {
     if (schemas.params) {
       const result = schemas.params.safeParse(req.params);
       if (!result.success) {
-        errorMessages.push(
+        errorDetails.push(
           ...result.error.errors.map((e) => ({
-            fields: e.path.join('.'),
-            message: e.message,
+            field: e.path.join('.'),
             location: 'params',
+            message: e.message,
           }))
         );
       }
     }
 
-    if (errorMessages.length > 0) {
-      return next(new CustomError(StatusCodes.UNPROCESSABLE_ENTITY, JSON.stringify(errorMessages)));
+    if (errorDetails.length > 0) {
+      return next(new CustomError(statusCode, 'Validation failed', errorDetails));
     }
 
     next();

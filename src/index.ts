@@ -1,4 +1,5 @@
 import Server from './app/server';
+
 import logger from './shared/logger/LoggerManager';
 
 async function runServer() {
