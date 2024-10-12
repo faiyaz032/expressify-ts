@@ -1,3 +1,4 @@
+import dotenv from 'dotenv-flow';
 import express, { Application, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import addRequestId from '../middlewares/addRequestId';
@@ -11,6 +12,8 @@ import sendResponse from '../shared/utils/sendResponse';
 class AppFactory {
   static createApp(): Application {
     logger.info('Creating app...');
+
+    dotenv.config();
     const app = express();
 
     app.use(express.json());
