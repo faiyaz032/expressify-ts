@@ -1,6 +1,8 @@
 import { Application } from 'express';
 import { Server as HTTPServer } from 'http';
+import path from 'path';
 import config from '../configs';
+import SQLiteDatabase from '../shared/database/SQLiteDatabase';
 import AppErrorHandler from '../shared/error-handling';
 import logger from '../shared/logger/LoggerManager';
 import AppFactory from './app'; // Assuming './app' exports an object with a method `createApp`
@@ -22,8 +24,8 @@ class Server {
   public async run(): Promise<ServerDto> {
     const expressApp = AppFactory.createApp();
     const server = await this.openConnection(expressApp);
-
-    //this.database.connect();  // Assuming database has a connect() method
+    //configure database
+    new SQLiteDatabase(path.join(__dirname, '..', '..', 'database.sqlite'));
     return server;
   }
 

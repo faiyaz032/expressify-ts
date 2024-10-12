@@ -3,19 +3,20 @@ import { StatusCodes } from 'http-status-codes';
 import { AnyZodObject } from 'zod';
 import CustomError from '../shared/error-handling/CustomError';
 
+// Custom type to infer the types of the body, query, and params based on Zod schemas
 interface ValidationSchemas {
   body?: AnyZodObject;
   query?: AnyZodObject;
   params?: AnyZodObject;
 }
 
-// Utility function to validate a request using Zod
+// Utility function to validate a request using Zod and apply types
 export default function validateResource(schemas: ValidationSchemas) {
   return (req: Request, res: Response, next: NextFunction) => {
     const errorDetails: Array<{ field: string; message: string; location: string }> = [];
-
     let statusCode = StatusCodes.BAD_REQUEST; // Default status code
 
+    // Validate body
     if (schemas.body) {
       const result = schemas.body.safeParse(req.body);
       if (!result.success) {
@@ -27,9 +28,11 @@ export default function validateResource(schemas: ValidationSchemas) {
             message: e.message,
           }))
         );
+      } else {
       }
     }
 
+    // Validate query
     if (schemas.query) {
       const result = schemas.query.safeParse(req.query);
       if (!result.success) {
@@ -40,9 +43,11 @@ export default function validateResource(schemas: ValidationSchemas) {
             message: e.message,
           }))
         );
+      } else {
       }
     }
 
+    // Validate params
     if (schemas.params) {
       const result = schemas.params.safeParse(req.params);
       if (!result.success) {
@@ -53,6 +58,7 @@ export default function validateResource(schemas: ValidationSchemas) {
             message: e.message,
           }))
         );
+      } else {
       }
     }
 

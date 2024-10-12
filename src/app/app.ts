@@ -13,8 +13,6 @@ class AppFactory {
     logger.info('Creating app...');
     const app = express();
 
-    process.env.DATABASE;
-
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
