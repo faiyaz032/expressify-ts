@@ -26,6 +26,13 @@ class AppFactory {
       sendResponse(res, StatusCodes.OK, 'Server is healthy');
     });
 
+    app.post('/create', async (req, res) => {
+      sendResponse(res, StatusCodes.CREATED, 'OK', {
+        name: req.body.name,
+        age: req.body.age,
+      });
+    });
+
     const router = express.Router();
     loadAllModules(router);
     app.use('/api/v1', router);

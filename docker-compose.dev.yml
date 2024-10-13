@@ -1,8 +1,10 @@
 services:
   app-server:
+    image: 'expressify-ts'
     build:
       context: .
       dockerfile: Dockerfile.dev
+
     ports:
       - '8080:8080'
     volumes:
@@ -19,6 +21,8 @@ services:
       - '27017:27017'
     volumes:
       - mongo-data:/data/db
+    logging:
+      driver: 'none'
 
 volumes:
   mongo-data:

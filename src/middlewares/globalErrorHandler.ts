@@ -1,6 +1,7 @@
 import { Application, NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import AppErrorHandler from '../shared/error-handling';
+import logger from '../shared/logger/LoggerManager'; // Import the logger
 
 interface ResponseData {
   success: boolean;
@@ -13,6 +14,9 @@ interface ResponseData {
 
 export default function globalErrorHandler(expressApp: Application) {
   expressApp.use((error: any, req: Request, res: Response, next: NextFunction) => {
+    const requestId = res.get('X-Request-Id') || 'N/A'; // Retrieve request ID
+
+    // Default operational status
     if (error && typeof error === 'object') {
       if (error.operational === undefined || error.operational === null) {
         error.operational = true;
@@ -27,8 +31,11 @@ export default function globalErrorHandler(expressApp: Application) {
       statusCode: error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
       message: error.message,
       operational: error.operational,
-      requestId: res.get('X-Request-Id'),
+      requestId: requestId,
     };
+
+    // Log the error details
+    logger.logError(error, requestId, req);
 
     // Check if NODE_ENV is set to 'development'
     if (process.env.NODE_ENV?.trim() === 'development') {

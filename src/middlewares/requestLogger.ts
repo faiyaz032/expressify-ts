@@ -1,25 +1,35 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import logger from '../shared/logger/LoggerManager';
+import { RequestWithId } from './addRequestId';
 
-export default function requestLogger(req: Request, res: Response, next: NextFunction) {
-  if (req.method === 'GET' && req.url === '/metrics') {
-    return next();
-  }
+export default function requestLogger(req: RequestWithId, res: Response, next: NextFunction) {
   const start = Date.now();
 
-  // Log request details including method, URL, and headers
-  if (process.env.NODE_ENV?.trim() === 'production') {
-    logger.info(`Request: ${req.method} ${req.originalUrl}`);
-    logger.info('Request Headers:', req.headers);
+  // Skip logging for health check or metrics endpoints
+  if (req.method === 'GET' && (req.url === '/health' || req.url === '/metrics')) {
+    return next();
   }
 
-  res.on('finish', () => {
+  // Get the request ID from headers
+  const requestId = res.get('x-request-id');
+
+  // Capture the original end function
+  const originalEnd = res.end;
+
+  // Override the end function
+  res.end = function (chunk?: any, encoding?: any, callback?: any): any {
+    // Restore the original end function
+    res.end = originalEnd;
+
+    // Call the original end function
+    res.end(chunk, encoding, callback);
+
+    // Calculate response time
     const responseTime = Date.now() - start;
-    const { statusCode } = res;
-    const { method, originalUrl } = req;
-    // Log response status code, request method, URL, and response time
-    logger.info(`${method} ${originalUrl} - Response: ${statusCode} [${responseTime}ms]`);
-  });
+
+    // Use the custom logRequest method with request ID
+    logger.logRequest(req, res, responseTime, requestId!);
+  };
 
   next();
 }
