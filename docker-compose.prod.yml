@@ -1,0 +1,22 @@
+services:
+  app-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: ihost-backend:latest
+    ports:
+      - '8080:8080'
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017/ihost
+    env_file:
+      - .env.production # Change to your production environment file if needed
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - '127.0.0.1:27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

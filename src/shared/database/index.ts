@@ -1,7 +1,29 @@
-import SQLiteDatabase from './SQLiteDatabase';
+import { connect } from 'mongoose';
+import logger from '../logger/LoggerManager';
 
-const sqlite3Database = SQLiteDatabase.getInstance();
+class Database {
+  private static instance: Database;
+  private dbUri: string;
 
-const db = sqlite3Database.getDatabase();
+  private constructor() {
+    this.dbUri = process.env.MONGODB_URI || 'mongodb://mongo:27017/ihost';
+  }
 
-export default db;
+  public static getInstance(): Database {
+    if (!Database.instance) {
+      Database.instance = new Database();
+    }
+    return Database.instance;
+  }
+
+  public async connect(): Promise<void> {
+    try {
+      await connect(this.dbUri);
+      logger.info('Database connected successfully');
+    } catch (error) {
+      logger.error('Database connection error:', error);
+    }
+  }
+}
+
+export default Database;

@@ -1,0 +1,22 @@
+# Dockerfile for Production
+FROM node:lts-alpine
+
+WORKDIR /app
+
+# Copy package.json and yarn.lock first to leverage Docker cache
+COPY package.json yarn.lock ./
+
+# Install only production dependencies
+RUN yarn install --production
+
+# Copy the rest of the application files
+COPY . .
+
+# Set environment to production
+ENV NODE_ENV=production
+
+# Expose the port your app runs on
+EXPOSE 8080
+
+# Run the application in production mode
+CMD ["yarn", "start"]

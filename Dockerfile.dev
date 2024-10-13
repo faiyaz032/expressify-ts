@@ -1,0 +1,15 @@
+FROM node:lts-alpine
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install  # Install all dependencies including dev dependencies
+
+COPY . .
+
+ENV NODE_ENV=development
+
+EXPOSE 8080
+
+CMD [ "yarn", "run", "ts-node-dev", "--respawn", "--transpile-only", "--poll", "./src/index.ts" ]

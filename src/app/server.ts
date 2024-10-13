@@ -1,8 +1,7 @@
 import { Application } from 'express';
 import { Server as HTTPServer } from 'http';
-import path from 'path';
 import config from '../configs';
-import SQLiteDatabase from '../shared/database/SQLiteDatabase';
+import Database from '../shared/database';
 import AppErrorHandler from '../shared/error-handling';
 import logger from '../shared/logger/LoggerManager';
 import AppFactory from './app'; // Assuming './app' exports an object with a method `createApp`
@@ -14,18 +13,13 @@ interface ServerDto {
 
 class Server {
   private connection: HTTPServer | undefined;
-  private database: any;
-
-  constructor(database?: any) {
-    //this.connection = undefined;
-    this.database = database;
-  }
 
   public async run(): Promise<ServerDto> {
     const expressApp = AppFactory.createApp();
     const server = await this.openConnection(expressApp);
-    //configure database
-    new SQLiteDatabase(path.join(__dirname, '..', '..', 'database.sqlite'));
+
+    const db = Database.getInstance();
+    await db.connect();
     return server;
   }
 
@@ -43,7 +37,7 @@ class Server {
     // Replace 'any' with the actual type of expressApp
     return new Promise<any>((resolve, reject) => {
       // Replace 'any' with the actual type of the resolved value
-      const PORT = process.env.PORT || 3333; // Assuming config.get('port') returns a number
+      const PORT = process.env.PORT || 8080; // Assuming config.get('port') returns a number
 
       // Configure socket
       //const httpServer = http.createServer(expressApp);
