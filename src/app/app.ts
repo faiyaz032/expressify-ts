@@ -27,7 +27,7 @@ class AppFactory {
     });
 
     app.post('/create', async (req, res) => {
-      sendResponse(res, StatusCodes.CREATED, 'OK', {
+      sendResponse(res, StatusCodes.CREATED, 'User Created successfully', {
         name: req.body.name,
         age: req.body.age,
       });
