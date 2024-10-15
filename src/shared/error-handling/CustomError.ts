@@ -17,8 +17,10 @@ class CustomError extends Error {
     this.success = false;
     this.operational = true;
     this.errors = { message, details };
-
-    Error.captureStackTrace(this, this.constructor);
+    // Capture the stack trace, but do not include the constructor
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CustomError);
+    }
   }
 }
 

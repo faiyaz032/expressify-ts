@@ -12,6 +12,7 @@
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d"
   },
   "dependencies": {
+    "@typegoose/typegoose": "^12.8.0",
     "bcrypt": "^5.1.1",
     "config": "^3.3.12",
     "cross-env": "^7.0.3",
@@ -28,6 +29,7 @@
     "postgres": "^3.4.4",
     "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7",
+    "typegoose": "^5.9.1",
     "typeorm": "^0.3.20",
     "uuid": "^10.0.0",
     "winston": "^3.15.0",

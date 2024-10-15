@@ -1,12 +1,15 @@
 import { Application, NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import AppErrorHandler from '../shared/error-handling';
-import logger from '../shared/logger/LoggerManager'; // Import the logger
+import logger from '../shared/logger/LoggerManager';
 
 interface ResponseData {
   success: boolean;
   statusCode: number;
-  message: string;
+  errors: {
+    message: string;
+    details?: Array<{ field: string; message: string; location: string }>;
+  };
   operational?: boolean;
   requestId?: string;
   stack?: string;
@@ -14,14 +17,14 @@ interface ResponseData {
 
 export default function globalErrorHandler(expressApp: Application) {
   expressApp.use((error: any, req: Request, res: Response, next: NextFunction) => {
-    const requestId = res.get('X-Request-Id') || 'N/A'; // Retrieve request ID
-
-    // Default operational status
+    console.log('🚀 ~ expressApp.use ~ error:', error);
     if (error && typeof error === 'object') {
       if (error.operational === undefined || error.operational === null) {
         error.operational = true;
       }
     }
+
+    const requestId = res.get('X-Request-Id')!;
 
     const errorHandler = new AppErrorHandler();
     errorHandler.handleError(error);
@@ -29,20 +32,18 @@ export default function globalErrorHandler(expressApp: Application) {
     const responseData: ResponseData = {
       success: error.success || false,
       statusCode: error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-      message: error.message,
+      errors: error.errors || { message: 'An unexpected error occurred' }, // Use the new structure
       operational: error.operational,
-      requestId: requestId,
+      requestId: res.get('X-Request-Id'),
     };
-
     // Log the error details
     logger.logError(error, requestId, req);
-
     // Check if NODE_ENV is set to 'development'
-    if (process.env.NODE_ENV?.trim() === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       // Include stack trace in response
-      responseData.stack = error.stack;
+      responseData.stack = error.stack || new Error().stack;
     }
 
-    res.status(error?.statusCode || 500).json(responseData);
+    res.status(error?.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
   });
 }
