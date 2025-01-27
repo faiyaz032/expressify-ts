@@ -45,7 +45,7 @@ class LoggerManager {
       transports: [
         new winston.transports.Console({
           format: consoleFormat,
-          level: 'http', // Set back to 'http' to log HTTP requests to the console
+          level: 'info', // Set back to 'http' to log HTTP requests to the console
         }),
         new DailyRotateFile({
           filename: 'logs/application-%DATE%.log', // Store application logs in application.log

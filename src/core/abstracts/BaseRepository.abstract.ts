@@ -57,7 +57,7 @@ export abstract class BaseRepository<T> {
     }
   }
 
-  async findAll(query: FilterQuery<T> = {}): Promise<PaginatedResult<T>> {
+  async findAll(query: FilterQuery<T> = {}): Promise<PaginatedResult<DocumentType<T>>> {
     try {
       const {
         page = 1,
@@ -67,7 +67,7 @@ export abstract class BaseRepository<T> {
         selectFields = [],
         populateFields = [],
         ...cleanQuery
-      } = query as any; // Cast to any to avoid type issues
+      } = query as any;
 
       const pageNum = Number(page) || 1;
       const limitNum = Number(limit) || 10;
@@ -83,13 +83,12 @@ export abstract class BaseRepository<T> {
             }
           : cleanQuery;
 
-      // Build the query with optional selects and populates
+      // Remove .lean() to return full Mongoose documents instead of plain objects
       const queryBuilder = this.model
         .find(finalQuery)
         .sort({ createdAt: 'desc' })
         .skip((pageNum - 1) * limitNum)
-        .limit(limitNum)
-        .lean();
+        .limit(limitNum);
 
       if (selectFields.length) {
         queryBuilder.select(selectFields.join(' '));
@@ -99,7 +98,6 @@ export abstract class BaseRepository<T> {
         populateFields.forEach((field: string) => queryBuilder.populate(field));
       }
 
-      // Execute the query and count documents
       const [data, total] = await Promise.all([queryBuilder.exec(), this.model.countDocuments(finalQuery)]);
 
       return {
