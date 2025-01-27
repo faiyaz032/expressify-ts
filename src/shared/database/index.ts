@@ -1,4 +1,5 @@
 import { connect } from 'mongoose';
+import appConfig from '../../configs';
 import logger from '../logger/LoggerManager';
 
 class Database {
@@ -6,7 +7,7 @@ class Database {
   private dbUri: string;
 
   private constructor() {
-    this.dbUri = process.env.MONGODB_URI || 'mongodb://mongo:27017/ihost';
+    this.dbUri = appConfig.get('databaseUrl');
   }
 
   public static getInstance(): Database {

@@ -1,4 +1,4 @@
-import { DocumentType, getModelForClass, modelOptions, prop, ReturnModelType } from '@typegoose/typegoose';
+import { DocumentType, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 
 @modelOptions({ schemaOptions: { timestamps: true } })
 export class ProductSchema {
@@ -12,8 +12,5 @@ export class ProductSchema {
   description!: string;
 }
 
-export const Product = getModelForClass(ProductSchema);
-
 export type ProductDocument = DocumentType<ProductSchema>;
-
-export type ProductModel = ReturnModelType<typeof ProductSchema>;
+export const Product = getModelForClass(ProductSchema);

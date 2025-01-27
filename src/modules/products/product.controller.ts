@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import sendResponse from '../../shared/utils/sendResponse';
+import { toArray } from '../../shared/utils/toArray';
 import { CreateProductType, UpdateProductType } from './product.schema'; // Import your product schema types
 import ProductService from './product.service'; // Import your ProductService
 
@@ -36,8 +37,21 @@ class ProductController {
   // Get all products with optional filtering
   getAllProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const products = await this.productService.findAllProducts(req.query);
-      sendResponse(res, StatusCodes.OK, 'Products retrieved successfully', products);
+      const { search, searchFields, page, limit, selectFields, populateFields } = req.query;
+
+      // Prepare query object
+      const query = {
+        page: page as string,
+        limit: limit as string,
+        search: search as string,
+        searchFields: toArray(searchFields),
+        selectFields: toArray(selectFields),
+        populateFields: toArray(populateFields),
+      };
+
+      const products = await this.productService.findAllProducts(query);
+
+      sendResponse(res, StatusCodes.OK, 'Products retrieved successfully', products.data, products.pagination);
     } catch (error: any) {
       next(error);
     }

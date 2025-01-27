@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
+import { PaginatedResult } from '../../core/types/common.types';
 import CustomError from '../../shared/error-handling/CustomError';
 import logger from '../../shared/logger/LoggerManager';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema'; // Import ObjectIdType
@@ -95,7 +96,7 @@ class ProductService {
   };
 
   // Optional: Find multiple products based on a query
-  findAllProducts = async (query: FilterQuery<ProductDocument>): Promise<ProductDocument[]> => {
+  findAllProducts = async (query: FilterQuery<ProductDocument>): Promise<PaginatedResult<ProductDocument>> => {
     try {
       return await this.productRepository.findAll(query);
     } catch (error: any) {

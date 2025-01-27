@@ -1,13 +1,6 @@
 import { Response } from 'express';
 
-const sendResponse = (
-  res: Response,
-  statusCode: number,
-  message: string,
-  data?: any,
-  links?: any,
-  pagination?: any
-): void => {
+const sendResponse = (res: Response, statusCode: number, message: string, data?: any, pagination?: any): void => {
   // Uncomment if logger is imported or defined
   // logger.info(message, {
   //   responseCode: statusCode,
@@ -25,9 +18,6 @@ const sendResponse = (
 
   if (data !== undefined) {
     responseObject.data = data;
-  }
-  if (links !== undefined) {
-    responseObject.links = links;
   }
   if (pagination !== undefined) {
     responseObject.pagination = pagination;
