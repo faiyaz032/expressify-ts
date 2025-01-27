@@ -23,7 +23,7 @@ export abstract class BaseRepository<T> {
 
   async findById(id: ObjectIdType): Promise<DocumentType<T> | null> {
     try {
-      return (await this.model.findById(id).lean().exec()) as DocumentType<T> | null;
+      return (await this.model.findById(id).exec()) as DocumentType<T> | null;
     } catch (error: any) {
       logger.error(`Failed to find document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to find document. Please try again later.');
@@ -32,7 +32,7 @@ export abstract class BaseRepository<T> {
 
   async findOne(query: FilterQuery<T>): Promise<DocumentType<T> | null> {
     try {
-      return (await this.model.findOne(query).lean().exec()) as DocumentType<T> | null;
+      return (await this.model.findOne(query).exec()) as DocumentType<T> | null;
     } catch (error: any) {
       logger.error(`Failed to find document: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to find document. Please try again later.');
@@ -41,7 +41,7 @@ export abstract class BaseRepository<T> {
 
   async updateById(id: ObjectIdType, data: Partial<T>): Promise<DocumentType<T> | null> {
     try {
-      return (await this.model.findByIdAndUpdate(id, data, { new: true }).lean().exec()) as DocumentType<T> | null;
+      return (await this.model.findByIdAndUpdate(id, data, { new: true }).exec()) as DocumentType<T> | null;
     } catch (error: any) {
       logger.error(`Failed to update document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to update document. Please try again later.');
@@ -50,7 +50,7 @@ export abstract class BaseRepository<T> {
 
   async deleteById(id: ObjectIdType): Promise<DocumentType<T> | null> {
     try {
-      return (await this.model.findByIdAndDelete(id).lean().exec()) as DocumentType<T> | null;
+      return (await this.model.findByIdAndDelete(id).exec()) as DocumentType<T> | null;
     } catch (error: any) {
       logger.error(`Failed to delete document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to delete document. Please try again later.');
@@ -59,22 +59,31 @@ export abstract class BaseRepository<T> {
 
   async findAll(query: FilterQuery<T> = {}): Promise<PaginatedResult<T>> {
     try {
-      const { page, limit, search, searchFields, selectFields, populateFields, ...cleanQuery } = query;
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        searchFields = [],
+        selectFields = [],
+        populateFields = [],
+        ...cleanQuery
+      } = query as any; // Cast to any to avoid type issues
+
       const pageNum = Number(page) || 1;
       const limitNum = Number(limit) || 10;
 
-      let finalQuery: FilterQuery<T> = { ...cleanQuery } as FilterQuery<T>;
+      // Build the final query
+      const finalQuery: FilterQuery<T> =
+        search && searchFields.length
+          ? {
+              $and: [
+                cleanQuery,
+                { $or: searchFields.map((field: string) => ({ [field]: { $regex: search, $options: 'i' } })) },
+              ],
+            }
+          : cleanQuery;
 
-      if (search && searchFields?.length) {
-        const searchConditions = searchFields.map((field: string) => ({
-          [field]: { $regex: search, $options: 'i' },
-        }));
-
-        finalQuery = {
-          $and: [cleanQuery as FilterQuery<T>, { $or: searchConditions } as FilterQuery<T>],
-        } as FilterQuery<T>;
-      }
-
+      // Build the query with optional selects and populates
       const queryBuilder = this.model
         .find(finalQuery)
         .sort({ createdAt: 'desc' })
@@ -82,14 +91,15 @@ export abstract class BaseRepository<T> {
         .limit(limitNum)
         .lean();
 
-      if (selectFields?.length) {
+      if (selectFields.length) {
         queryBuilder.select(selectFields.join(' '));
       }
 
-      if (populateFields?.length) {
-        populateFields.forEach((field: string) => queryBuilder.populate(field).lean());
+      if (populateFields.length) {
+        populateFields.forEach((field: string) => queryBuilder.populate(field));
       }
 
+      // Execute the query and count documents
       const [data, total] = await Promise.all([queryBuilder.exec(), this.model.countDocuments(finalQuery)]);
 
       return {
