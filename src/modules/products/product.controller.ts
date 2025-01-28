@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import sendResponse from '../../shared/utils/sendResponse';
-import { CreateProductType, UpdateProductType } from './product.schema';
+import { CreateProductType } from './product.schema';
 import ProductService from './product.service';
 
 export default class ProductController {
@@ -27,8 +27,8 @@ export default class ProductController {
 
   updateProduct = async (req: Request, res: Response) => {
     const id = req.params.id as ObjectIdType;
-    const data = req.body as UpdateProductType;
-    const product = await this.productService.updateById(id, data);
+
+    const product = await this.productService.updateById(id, req.body);
     sendResponse(res, StatusCodes.OK, 'Product updated successfully', product);
   };
 

@@ -7,10 +7,10 @@ import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import { calculatePagination } from '../../shared/utils/calculatePagination';
 import { PaginatedResult, TypegooseModel } from '../types/common.types';
 
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository<T, CreateDtoType> {
   protected constructor(protected readonly model: TypegooseModel<T>) {}
 
-  async create(data: Partial<T>): Promise<DocumentType<T>> {
+  async create(data: CreateDtoType): Promise<DocumentType<T>> {
     try {
       const newDocument = new this.model(data);
       return (await newDocument.save()) as DocumentType<T>;
@@ -38,7 +38,7 @@ export abstract class BaseRepository<T> {
     }
   }
 
-  async updateById(id: ObjectIdType, data: Partial<T>): Promise<DocumentType<T> | null> {
+  async updateById(id: ObjectIdType, data: Partial<DocumentType<T>>): Promise<DocumentType<T> | null> {
     try {
       return (await this.model.findByIdAndUpdate(id, data, { new: true }).exec()) as DocumentType<T> | null;
     } catch (error: any) {

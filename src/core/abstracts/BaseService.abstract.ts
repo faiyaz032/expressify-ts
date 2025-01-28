@@ -7,17 +7,17 @@ import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import { PaginatedResult } from '../types/common.types';
 import { BaseRepository } from './BaseRepository.abstract';
 
-export default abstract class BaseService<T, R extends BaseRepository<T>> {
+export default abstract class BaseService<T, CreateTypeDto> {
   /**
    * @param repository - The repository instance to be used by the service.
    */
-  constructor(protected readonly repository: R) {}
+  constructor(protected readonly repository: BaseRepository<T, CreateTypeDto>) {}
 
   /**
    * @param data - The data to be created.
    * @returns The created document.
    */
-  async create(data: Partial<T>): Promise<DocumentType<T>> {
+  async create(data: CreateTypeDto): Promise<DocumentType<T>> {
     try {
       return this.repository.create(data);
     } catch (error: any) {
@@ -56,7 +56,7 @@ export default abstract class BaseService<T, R extends BaseRepository<T>> {
     }
   }
 
-  async updateById(id: ObjectIdType, data: Partial<T>): Promise<DocumentType<T> | null> {
+  async updateById(id: ObjectIdType, data: Partial<DocumentType<T>>): Promise<DocumentType<T> | null> {
     return this.repository.updateById(id, data);
   }
 
