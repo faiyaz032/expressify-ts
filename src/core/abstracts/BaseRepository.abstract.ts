@@ -1,15 +1,14 @@
-import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
-import { AnyParamConstructor, BeAnObject } from '@typegoose/typegoose/lib/types';
+import { DocumentType } from '@typegoose/typegoose';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
 import CustomError from '../../shared/error-handling/CustomError';
 import logger from '../../shared/logger/LoggerManager';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import { calculatePagination } from '../../shared/utils/calculatePagination';
-import { PaginatedResult } from '../types/common.types';
+import { PaginatedResult, TypegooseModel } from '../types/common.types';
 
 export abstract class BaseRepository<T> {
-  protected constructor(protected readonly model: ReturnModelType<AnyParamConstructor<T>, BeAnObject>) {}
+  protected constructor(protected readonly model: TypegooseModel<T>) {}
 
   async create(data: Partial<T>): Promise<DocumentType<T>> {
     try {
@@ -58,55 +57,54 @@ export abstract class BaseRepository<T> {
   }
 
   async findAll(query: FilterQuery<T> = {}): Promise<PaginatedResult<DocumentType<T>>> {
-    try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        searchFields = [],
-        selectFields = [],
-        populateFields = [],
-        ...cleanQuery
-      } = query as any;
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      searchFields = '',
+      selectFields = '',
+      populateFields = '',
+      ...cleanQuery
+    } = query as any;
 
-      const pageNum = Number(page) || 1;
-      const limitNum = Number(limit) || 10;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
 
-      // Build the final query
-      const finalQuery: FilterQuery<T> =
-        search && searchFields.length
-          ? {
-              $and: [
-                cleanQuery,
-                { $or: searchFields.map((field: string) => ({ [field]: { $regex: search, $options: 'i' } })) },
-              ],
-            }
-          : cleanQuery;
+    // Convert comma-separated strings to arrays and ensure they're valid
+    const searchFieldsArray = typeof searchFields === 'string' ? searchFields.split(',').filter(Boolean) : [];
+    const selectFieldsArray = typeof selectFields === 'string' ? selectFields.split(',').filter(Boolean) : [];
+    const populateFieldsArray = typeof populateFields === 'string' ? populateFields.split(',').filter(Boolean) : [];
 
-      // Remove .lean() to return full Mongoose documents instead of plain objects
-      const queryBuilder = this.model
-        .find(finalQuery)
-        .sort({ createdAt: 'desc' })
-        .skip((pageNum - 1) * limitNum)
-        .limit(limitNum);
+    // Build the final query
+    const finalQuery: FilterQuery<T> =
+      search && searchFieldsArray.length
+        ? {
+            $and: [
+              cleanQuery,
+              { $or: searchFieldsArray.map((field: string) => ({ [field]: { $regex: search, $options: 'i' } })) },
+            ],
+          }
+        : cleanQuery;
 
-      if (selectFields.length) {
-        queryBuilder.select(selectFields.join(' '));
-      }
+    const queryBuilder = this.model
+      .find(finalQuery)
+      .sort({ createdAt: 'desc' })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum);
 
-      if (populateFields.length) {
-        populateFields.forEach((field: string) => queryBuilder.populate(field));
-      }
-
-      const [data, total] = await Promise.all([queryBuilder.exec(), this.model.countDocuments(finalQuery)]);
-
-      return {
-        data: data as DocumentType<T>[],
-        pagination: calculatePagination({ page: pageNum, limit: limitNum, total }),
-      };
-    } catch (error: any) {
-      logger.error(`Failed to find documents: ${error.message}`, { error });
-      throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to find documents. Please try again later.');
+    if (selectFieldsArray.length) {
+      queryBuilder.select(selectFieldsArray.join(' '));
     }
+
+    if (populateFieldsArray.length) {
+      populateFieldsArray.forEach((field: string) => queryBuilder.populate(field));
+    }
+
+    const [data, total] = await Promise.all([queryBuilder.exec(), this.model.countDocuments(finalQuery)]);
+
+    return {
+      data: data as DocumentType<T>[],
+      pagination: calculatePagination({ page: pageNum, limit: limitNum, total }),
+    };
   }
 }

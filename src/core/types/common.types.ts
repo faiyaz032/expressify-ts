@@ -1,4 +1,5 @@
 import { ReturnModelType } from '@typegoose/typegoose';
+import { AnyParamConstructor, BeAnObject } from '@typegoose/typegoose/lib/types';
 
 export interface Pagination {
   totalItems: number;
@@ -26,4 +27,4 @@ export interface QueryOptions {
   populate?: string;
 }
 
-export type TypegooseModel<T> = ReturnModelType<new () => T>;
+export type TypegooseModel<T> = ReturnModelType<AnyParamConstructor<T>, BeAnObject>;

@@ -1,87 +1,40 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import sendResponse from '../../shared/utils/sendResponse';
-import { toArray } from '../../shared/utils/toArray';
-import { CreateProductType, UpdateProductType } from './product.schema'; // Import your product schema types
-import ProductService from './product.service'; // Import your ProductService
+import { CreateProductType, UpdateProductType } from './product.schema';
+import ProductService from './product.service';
 
-class ProductController {
-  private productService: ProductService;
+export default class ProductController {
+  constructor(private readonly productService: ProductService) {}
 
-  constructor() {
-    this.productService = new ProductService();
-  }
-
-  // Create a new product
-  createProduct = async (req: Request<{}, {}, CreateProductType>, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const product = await this.productService.createProduct(req.body);
-      sendResponse(res, StatusCodes.CREATED, 'Product created successfully', product);
-    } catch (error: any) {
-      next(error);
-    }
+  createProduct = async (req: Request, res: Response) => {
+    const data = req.body as CreateProductType;
+    const product = await this.productService.create(data);
+    sendResponse(res, StatusCodes.CREATED, 'Product created successfully', product);
   };
 
-  // Get product by ID
-  getProductById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const product = await this.productService.getProductById(id);
-      sendResponse(res, StatusCodes.OK, 'Product retrieved successfully', product);
-    } catch (error: any) {
-      next(error);
-    }
+  getAllProducts = async (req: Request, res: Response) => {
+    const result = await this.productService.getAll(req.query);
+    sendResponse(res, StatusCodes.OK, 'Products retrieved successfully', result.data, result.pagination);
   };
 
-  // Get all products with optional filtering
-  getAllProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { search, searchFields, page, limit, selectFields, populateFields } = req.query;
-
-      // Prepare query object
-      const query = {
-        page: page as string,
-        limit: limit as string,
-        search: search as string,
-        searchFields: toArray(searchFields),
-        selectFields: toArray(selectFields),
-        populateFields: toArray(populateFields),
-      };
-
-      const products = await this.productService.findAllProducts(query);
-
-      sendResponse(res, StatusCodes.OK, 'Products retrieved successfully', products.data, products.pagination);
-    } catch (error: any) {
-      next(error);
-    }
+  getProductById = async (req: Request, res: Response) => {
+    const id = req.params.id as ObjectIdType;
+    const product = await this.productService.getOneById(id);
+    sendResponse(res, StatusCodes.OK, 'Product retrieved successfully', product);
   };
 
-  // Update product by ID
-  updateProduct = async (
-    req: Request<{ id: ObjectIdType }, {}, UpdateProductType>,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const updatedProduct = await this.productService.updateProduct(id, req.body);
-      sendResponse(res, StatusCodes.OK, 'Product updated successfully', updatedProduct);
-    } catch (error: any) {
-      next(error);
-    }
+  updateProduct = async (req: Request, res: Response) => {
+    const id = req.params.id as ObjectIdType;
+    const data = req.body as UpdateProductType;
+    const product = await this.productService.updateById(id, data);
+    sendResponse(res, StatusCodes.OK, 'Product updated successfully', product);
   };
 
-  // Delete product by ID
-  deleteProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const deletedProduct = await this.productService.deleteProduct(id);
-      sendResponse(res, StatusCodes.OK, 'Product deleted successfully', deletedProduct);
-    } catch (error: any) {
-      next(error);
-    }
+  deleteProduct = async (req: Request, res: Response) => {
+    const id = req.params.id as ObjectIdType;
+    await this.productService.deleteById(id);
+    sendResponse(res, StatusCodes.OK, 'Product deleted successfully');
   };
 }
-
-export default ProductController;
