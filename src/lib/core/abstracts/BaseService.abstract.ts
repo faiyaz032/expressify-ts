@@ -2,22 +2,15 @@ import { DocumentType } from '@typegoose/typegoose';
 import { logger } from '@typegoose/typegoose/lib/logSettings';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
-import CustomError from '../../shared/error-handling/CustomError';
-import { ObjectIdType } from '../../shared/schemas/objectId.schema';
+import CustomError from '../../../shared/error-handling/CustomError';
+import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
 import { PaginatedResult } from '../types/common.types';
 import { BaseRepository } from './BaseRepository.abstract';
 
-export default abstract class BaseService<T, CreateTypeDto> {
-  /**
-   * @param repository - The repository instance to be used by the service.
-   */
-  constructor(protected readonly repository: BaseRepository<T, CreateTypeDto>) {}
+export default abstract class BaseService<T> {
+  constructor(protected readonly repository: BaseRepository<T>) {}
 
-  /**
-   * @param data - The data to be created.
-   * @returns The created document.
-   */
-  async create(data: CreateTypeDto): Promise<DocumentType<T>> {
+  async create(data: Omit<T, '_id'>): Promise<DocumentType<T>> {
     try {
       return this.repository.create(data);
     } catch (error: any) {

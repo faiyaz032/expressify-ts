@@ -1,8 +1,7 @@
-import { BaseRepository } from '../../core/abstracts/BaseRepository.abstract';
+import { BaseRepository } from '../../lib/core/abstracts/BaseRepository.abstract';
 import { Product, ProductSchema } from './product.model';
-import { CreateProductType } from './product.schema';
 
-export default class ProductRepository extends BaseRepository<ProductSchema, CreateProductType> {
+export default class ProductRepository extends BaseRepository<ProductSchema> {
   constructor() {
     super(Product);
   }

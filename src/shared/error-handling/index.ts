@@ -1,32 +1,38 @@
 import http from 'http';
 import { StatusCodes } from 'http-status-codes';
 import util from 'util';
-import logger from '../logger/LoggerManager';
+import { Logger } from '../logger/Logger';
 import CustomError from './CustomError';
 
 class AppErrorHandler {
   private httpServerRef: http.Server | null = null;
 
+  constructor(
+    private readonly logger: Logger,
+    private readonly config: { exitOnUnhandledErrors: boolean; gracefulShutdownTimeout: number },
+    private readonly onShutdown?: () => Promise<void>
+  ) {}
+
   public listenToErrorEvents(httpServer: http.Server): void {
     this.httpServerRef = httpServer;
 
     process.on('uncaughtException', async (error: Error) => {
-      logger.error('Uncaught Exception:', error);
+      this.logger.error('Uncaught Exception:', error);
       await this.handleError(error);
     });
 
     process.on('unhandledRejection', async (reason: unknown) => {
-      logger.error('Unhandled Rejection:', reason);
+      this.logger.error('Unhandled Rejection:', reason);
       await this.handleError(reason);
     });
 
     process.on('SIGTERM', async () => {
-      logger.error('Received SIGTERM. Terminating server...');
+      this.logger.warn('Received SIGTERM. Terminating server...');
       await this.terminateServer();
     });
 
     process.on('SIGINT', async () => {
-      logger.error('Received SIGINT. Terminating server...');
+      this.logger.warn('Received SIGINT. Terminating server...');
       await this.terminateServer();
     });
   }
@@ -35,33 +41,50 @@ class AppErrorHandler {
     try {
       const appError = this.normalizeError(error);
 
-      if (!appError.operational) {
+      if (!appError.operational && this.config.exitOnUnhandledErrors) {
         await this.terminateServer();
       }
     } catch (handlingError) {
-      logger.error('The error handler failed.');
-      process.stdout.write(
-        'The error handler failed. Here are the handler failure and then the origin error that it tried to handle: '
-      );
-      process.stdout.write(JSON.stringify(handlingError));
-      process.stdout.write(JSON.stringify(error));
+      this.logger.error('The error handler failed.');
+      this.logger.error('Handler failure:', handlingError);
+      this.logger.error('Original error:', error);
     }
   }
 
   private async terminateServer(): Promise<void> {
-    if (this.httpServerRef) {
-      logger.warn('Gracefully shutting down the server...');
-      await new Promise((resolve) => this.httpServerRef!.close(resolve)); // Graceful shutdown
-      logger.warn('Server closed.');
+    try {
+      if (this.httpServerRef) {
+        this.logger.warn('Gracefully shutting down the server...');
+
+        // Call custom shutdown handler if provided
+        if (this.onShutdown) {
+          await Promise.race([
+            this.onShutdown(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Shutdown timeout')), this.config.gracefulShutdownTimeout)
+            ),
+          ]);
+        }
+
+        // Close HTTP server
+        await new Promise<void>((resolve) => {
+          this.httpServerRef!.close(() => resolve());
+        });
+
+        this.logger.warn('Server closed successfully.');
+      }
+    } catch (error) {
+      this.logger.error('Error during shutdown:', error);
+    } finally {
+      process.exit();
     }
-    console.log('Exiting process.');
-    process.exit();
   }
 
   private normalizeError(error: unknown): CustomError {
     if (error instanceof CustomError) {
       return error;
     }
+
     if (error instanceof Error) {
       return new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
     }
@@ -69,9 +92,7 @@ class AppErrorHandler {
     const inputType = typeof error;
     return new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Error Handler received a non-error instance with type - ${inputType}, value - ${util.inspect(
-        error
-      )}`
+      `Error Handler received a non-error instance with type - ${inputType}, value - ${util.inspect(error)}`
     );
   }
 }

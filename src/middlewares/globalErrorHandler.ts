@@ -1,7 +1,7 @@
 import { Application, NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import AppErrorHandler from '../shared/error-handling';
-import logger from '../shared/logger/LoggerManager';
+import logger from '../shared/logger';
 
 interface ResponseData {
   success: boolean;
@@ -15,7 +15,7 @@ interface ResponseData {
   stack?: string;
 }
 
-export default function globalErrorHandler(expressApp: Application) {
+export default function globalErrorHandler(expressApp: Application, errorHandler: AppErrorHandler) {
   expressApp.use((error: any, req: Request, res: Response, next: NextFunction) => {
     console.log('🚀 ~ expressApp.use ~ error:', error);
     if (error && typeof error === 'object') {
@@ -26,7 +26,6 @@ export default function globalErrorHandler(expressApp: Application) {
 
     const requestId = res.get('X-Request-Id')!;
 
-    const errorHandler = new AppErrorHandler();
     errorHandler.handleError(error);
 
     const responseData: ResponseData = {

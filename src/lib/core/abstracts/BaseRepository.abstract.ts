@@ -1,16 +1,16 @@
 import { DocumentType } from '@typegoose/typegoose';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
-import CustomError from '../../shared/error-handling/CustomError';
-import logger from '../../shared/logger/LoggerManager';
-import { ObjectIdType } from '../../shared/schemas/objectId.schema';
-import { calculatePagination } from '../../shared/utils/calculatePagination';
+import CustomError from '../../../shared/error-handling/CustomError';
+import logger from '../../../shared/logger';
+import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
+import { calculatePagination } from '../../../shared/utils/calculatePagination';
 import { PaginatedResult, TypegooseModel } from '../types/common.types';
 
-export abstract class BaseRepository<T, CreateDtoType> {
+export abstract class BaseRepository<T> {
   protected constructor(protected readonly model: TypegooseModel<T>) {}
 
-  async create(data: CreateDtoType): Promise<DocumentType<T>> {
+  async create(data: Omit<T, '_id'>): Promise<DocumentType<T>> {
     try {
       const newDocument = new this.model(data);
       return (await newDocument.save()) as DocumentType<T>;

@@ -1,4 +1,4 @@
-import { Pagination, QueryOptions } from '../../core/types/common.types';
+import { Pagination, QueryOptions } from '../../lib/core/types/common.types';
 
 export const calculatePagination = <T>({
   page = 1,

@@ -1,12 +1,11 @@
 // class ProductService {
 //   private productRepository: ProductRepository;
 
-import BaseService from '../../core/abstracts/BaseService.abstract';
+import BaseService from '../../lib/core/abstracts/BaseService.abstract';
 import { ProductSchema } from './product.model';
 import ProductRepository from './product.repository';
-import { CreateProductType } from './product.schema';
 
-class ProductService extends BaseService<ProductSchema, CreateProductType> {
+class ProductService extends BaseService<ProductSchema> {
   constructor(repository: ProductRepository) {
     super(repository);
   }

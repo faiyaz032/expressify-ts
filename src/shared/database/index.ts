@@ -1,20 +1,13 @@
 import { connect } from 'mongoose';
-import appConfig from '../../configs';
-import logger from '../logger/LoggerManager';
+import configs from '../../configs';
+import logger from '../logger';
 
 class Database {
   private static instance: Database;
   private dbUri: string;
 
-  private constructor() {
-    this.dbUri = appConfig.get('databaseUrl');
-  }
-
-  public static getInstance(): Database {
-    if (!Database.instance) {
-      Database.instance = new Database();
-    }
-    return Database.instance;
+  constructor() {
+    this.dbUri = configs.get('databaseUrl');
   }
 
   public async connect(): Promise<void> {

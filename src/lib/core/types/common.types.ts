@@ -1,7 +1,7 @@
 import { ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor, BeAnObject } from '@typegoose/typegoose/lib/types';
 
-export interface Pagination {
+export type Pagination = {
   totalItems: number;
   currentPage: number;
   pageSize: number;
@@ -10,14 +10,14 @@ export interface Pagination {
   hasPreviousPage: boolean;
   nextPage: number | null;
   previousPage: number | null;
-}
+};
 
-export interface PaginatedResult<T> {
+export type PaginatedResult<T> = {
   data: T[];
   pagination: Pagination;
-}
+};
 
-export interface QueryOptions {
+export type QueryOptions = {
   page?: number;
   limit?: number;
   sort?: Record<string, 1 | -1>;
@@ -25,6 +25,6 @@ export interface QueryOptions {
   searchFields?: string[];
   select?: string;
   populate?: string;
-}
+};
 
 export type TypegooseModel<T> = ReturnModelType<AnyParamConstructor<T>, BeAnObject>;

@@ -1,5 +1,5 @@
 import { NextFunction, Response } from 'express';
-import logger from '../shared/logger/LoggerManager';
+import logger from '../shared/logger';
 import { RequestWithId } from './addRequestId';
 
 export default function requestLogger(req: RequestWithId, res: Response, next: NextFunction) {

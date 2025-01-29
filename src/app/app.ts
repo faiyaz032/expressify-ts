@@ -2,18 +2,19 @@ import dotenv from 'dotenv-flow';
 import express, { Application, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import morgan from 'morgan';
+import '../configs';
 import addRequestId from '../middlewares/addRequestId';
 import globalErrorHandler from '../middlewares/globalErrorHandler';
 import notFoundHandler from '../middlewares/notFoundHandler';
 import requestLogger from '../middlewares/requestLogger';
 import loadAllModules from '../modules';
-import logger from '../shared/logger/LoggerManager';
+import AppErrorHandler from '../shared/error-handling';
+import logger from '../shared/logger';
 import sendResponse from '../shared/utils/sendResponse';
 
 class AppFactory {
-  static createApp(): Application {
+  createApp(errorHandler: AppErrorHandler): Application {
     logger.info('Creating app...');
-
     dotenv.config();
     const app = express();
 
@@ -40,7 +41,7 @@ class AppFactory {
     app.use('/api/v1', router);
 
     app.all('*', notFoundHandler);
-    globalErrorHandler(app);
+    globalErrorHandler(app, errorHandler); // Pass errorHandler to globalErrorHandler
 
     return app;
   }
