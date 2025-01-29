@@ -4,10 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "clean": "rimraf ./dist",
-    "build": "npm run clean && tsc --build",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",
-    "start": "cross-env NODE_ENV=production node ./dist/src/index.js",
+    "start": "cross-env NODE_ENV=production node --trace-warnings ./dist/src/index.js",
+    "start:debug": "cross-env NODE_ENV=production node --trace-warnings --inspect ./dist/src/index.js",
     "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d"
   },

@@ -73,7 +73,7 @@ export class Logger implements ILogger {
       transports: [
         new winston.transports.Console({
           format: consoleFormat,
-          level: 'info',
+          level: 'http', // Set to 'http' to log HTTP level messages
         }),
         new DailyRotateFile({
           filename: `${this.config.logDirectory}/application-%DATE%.log`,

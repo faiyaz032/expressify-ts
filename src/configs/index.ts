@@ -10,7 +10,7 @@ const initLogger = {
 };
 
 class ConfigManager {
-  private config: Record<string, any>;
+  private config: Record<string, any> = {};
 
   constructor() {
     try {
@@ -23,6 +23,7 @@ class ConfigManager {
 
   private loadConfig(): void {
     const nodeEnv = process.env.NODE_ENV || 'development';
+
     const envFile = `.env.${nodeEnv}`;
     const envFilePath = path.resolve(process.cwd(), envFile);
 

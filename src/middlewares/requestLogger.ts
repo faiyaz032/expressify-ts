@@ -1,4 +1,6 @@
+// middleware/requestLogger.ts
 import { NextFunction, Response } from 'express';
+
 import logger from '../shared/logger';
 import { RequestWithId } from './addRequestId';
 
@@ -11,7 +13,7 @@ export default function requestLogger(req: RequestWithId, res: Response, next: N
   }
 
   // Get the request ID from headers
-  const requestId = res.get('x-request-id');
+  const requestId = res.get('x-request-id') as string;
 
   // Capture the original end function
   const originalEnd = res.end;
@@ -27,8 +29,8 @@ export default function requestLogger(req: RequestWithId, res: Response, next: N
     // Calculate response time
     const responseTime = Date.now() - start;
 
-    // Use the custom logRequest method with request ID
-    logger.logRequest(req, res, responseTime, requestId!);
+    // Use the custom logRequest method with request ID and additional info
+    logger.logRequest(req, res, responseTime, requestId);
   };
 
   next();

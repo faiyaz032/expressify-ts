@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
-    "outDir": "./dist",
+    "target": "es2017",
     "module": "commonjs",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "lib": ["es6"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": ".",
     "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
     "emitDecoratorMetadata": true,
-    "useDefineForClassFields": true,
-    "strictPropertyInitialization": false
-  }
+    "experimentalDecorators": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
