@@ -65,7 +65,7 @@ export class Logger implements ILogger {
       })
     );
 
-    const fileFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
+    const jsonFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
 
     return winston.createLogger({
       levels: logLevels,
@@ -76,28 +76,28 @@ export class Logger implements ILogger {
           level: 'http', // Set to 'http' to log HTTP level messages
         }),
         new DailyRotateFile({
-          filename: `${this.config.logDirectory}/application-%DATE%.log`,
+          filename: `${this.config.logDirectory}/application-%DATE%.json`,
           datePattern: this.config.datePattern,
           maxSize: this.config.maxFileSize,
           maxFiles: this.config.maxFiles,
-          format: fileFormat,
+          format: jsonFormat,
           level: 'info',
         }),
         new DailyRotateFile({
-          filename: `${this.config.logDirectory}/requests-%DATE%.log`,
+          filename: `${this.config.logDirectory}/requests-%DATE%.json`,
           datePattern: this.config.datePattern,
           maxSize: this.config.maxFileSize,
           maxFiles: this.config.maxFiles,
+          format: jsonFormat,
           level: 'http',
-          format: fileFormat,
         }),
         new DailyRotateFile({
-          filename: `${this.config.logDirectory}/error-%DATE%.log`,
+          filename: `${this.config.logDirectory}/error-%DATE%.json`,
           datePattern: this.config.datePattern,
           maxSize: this.config.maxFileSize,
           maxFiles: this.config.maxFiles,
+          format: jsonFormat,
           level: 'error',
-          format: fileFormat,
         }),
       ],
     });
