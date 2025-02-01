@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import { singleton } from 'tsyringe';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import configs from '../../configs';
 import { ILogger, LoggerConfig } from './logger.types';
 
+@singleton()
 export class Logger implements ILogger {
   private logger: winston.Logger;
   private config: LoggerConfig;

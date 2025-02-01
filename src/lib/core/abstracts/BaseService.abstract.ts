@@ -2,19 +2,25 @@ import { DocumentType } from '@typegoose/typegoose';
 import { logger } from '@typegoose/typegoose/lib/logSettings';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
+import { Logger } from 'winston';
+import { resolve } from '../../../registry';
 import CustomError from '../../../shared/error-handling/CustomError';
 import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
+import { loggerToken } from '../../../shared/tokens';
 import { PaginatedResult } from '../types/common.types';
 import { BaseRepository } from './BaseRepository.abstract';
 
 export default abstract class BaseService<T> {
-  constructor(protected readonly repository: BaseRepository<T>) {}
+  protected readonly logger: Logger;
+  constructor(protected readonly repository: BaseRepository<T>) {
+    this.logger = resolve<Logger>(loggerToken);
+  }
 
   async create(data: Omit<T, '_id'>): Promise<DocumentType<T>> {
     try {
       return this.repository.create(data);
     } catch (error: any) {
-      logger.error(`Failed to create document: ${error}`, { error });
+      this.logger.error(`Failed to create document: ${error}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to create document. Please try again later.');
     }
   }
@@ -23,7 +29,7 @@ export default abstract class BaseService<T> {
     try {
       return this.repository.findAll(query);
     } catch (error: any) {
-      logger.error(`Failed to get all documents: ${error}`, { error });
+      this.logger.error(`Failed to get all documents: ${error}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to get all documents. Please try again later.');
     }
   }
@@ -32,7 +38,7 @@ export default abstract class BaseService<T> {
     try {
       return this.repository.findOne(query);
     } catch (error: any) {
-      logger.error(`Failed to get one document: ${error}`, { error });
+      this.logger.error(`Failed to get one document: ${error}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to get one document. Please try again later.');
     }
   }
@@ -41,7 +47,7 @@ export default abstract class BaseService<T> {
     try {
       return this.repository.findById(id);
     } catch (error: any) {
-      logger.error(`Failed to get one document by id: ${error}`, { error });
+      this.logger.error(`Failed to get one document by id: ${error}`, { error });
       throw new CustomError(
         StatusCodes.INTERNAL_SERVER_ERROR,
         'Failed to get one document by id. Please try again later.'
@@ -50,7 +56,12 @@ export default abstract class BaseService<T> {
   }
 
   async updateById(id: ObjectIdType, data: Partial<DocumentType<T>>): Promise<DocumentType<T> | null> {
-    return this.repository.updateById(id, data);
+    try {
+      return this.repository.updateById(id, data);
+    } catch (error: any) {
+      this.logger.error(`Failed to update document by id: ${error}`, { error });
+      throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to update document. Please try again later.');
+    }
   }
 
   async deleteById(id: ObjectIdType): Promise<DocumentType<T> | null> {

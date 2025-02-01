@@ -1,14 +1,17 @@
 import http from 'http';
 import { StatusCodes } from 'http-status-codes';
+import { inject, singleton } from 'tsyringe';
 import util from 'util';
 import { Logger } from '../logger/Logger';
+import { loggerToken } from '../tokens';
 import CustomError from './CustomError';
 
+@singleton()
 class AppErrorHandler {
   private httpServerRef: http.Server | null = null;
 
   constructor(
-    private readonly logger: Logger,
+    @inject(loggerToken) private readonly logger: Logger,
     private readonly config: { exitOnUnhandledErrors: boolean; gracefulShutdownTimeout: number },
     private readonly onShutdown?: () => Promise<void>
   ) {}

@@ -80,6 +80,7 @@ class ConfigManager {
         if (acc && typeof acc === 'object' && part in acc) {
           return acc[part];
         }
+
         throw new Error(`Configuration key '${key}' not found`);
       }, this.config);
     } catch (error) {

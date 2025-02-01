@@ -3,7 +3,10 @@ export default {
   databaseUrl: process.env.DATABASE || 'From development file',
   environment: 'development',
   jwtSecretKey: process.env.JWT_SECRET_KEY,
-
+  server: {
+    port: 8080,
+    baseUrl: 'http://localhost:8080',
+  },
   logger: {
     level: process.env.LOG_LEVEL || 'info',
     logDirectory: 'logs',

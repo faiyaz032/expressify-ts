@@ -1,5 +1,6 @@
 import { ReturnModelType } from '@typegoose/typegoose';
 import { AnyParamConstructor, BeAnObject } from '@typegoose/typegoose/lib/types';
+import { RequestHandler } from 'express';
 
 export type Pagination = {
   totalItems: number;
@@ -27,4 +28,21 @@ export type QueryOptions = {
   populate?: string;
 };
 
+export type HTTPMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
+
+export type RouterOptions = {
+  method: HTTPMethod;
+  path: string;
+  middlewares?: RequestHandler[];
+  methodName: string;
+};
+
 export type TypegooseModel<T> = ReturnModelType<AnyParamConstructor<T>, BeAnObject>;
+
+export type Constructor = new (...args: any[]) => any;
+
+export type ControllerMetadata = {
+  basePath: string;
+  routes: RouterOptions[];
+  middlewares: RequestHandler[];
+};

@@ -1,32 +1,21 @@
-import AppFactory from './app/app';
+import 'reflect-metadata';
+import { Logger } from 'winston';
 import Server from './app/server';
-import configs from './configs';
-import Database from './shared/database';
-import AppErrorHandler from './shared/error-handling';
-import logger from './shared/logger';
+import { registerDependencies, resolve } from './registry';
+import { loggerToken } from './shared/tokens';
 
-async function runServer() {
+async function bootstrap() {
   try {
+    registerDependencies();
+    const logger = resolve<Logger>(loggerToken);
+
     logger.info('Starting server initialization...');
 
-    // Log config values (sanitize sensitive data)
-    logger.info('Loading configuration...', {
-      port: configs.get('port'),
-      environment: configs.get('environment'),
-    });
+    // Register all dependencies
 
-    const config = { port: configs.get('port'), environment: configs.get('environment') };
-
-    logger.info('Initializing components...');
-    const database = new Database();
-    const errorHandler = new AppErrorHandler(logger, {
-      exitOnUnhandledErrors: true,
-      gracefulShutdownTimeout: 10000,
-    });
-    const appFactory = new AppFactory();
-
-    logger.info('Creating server instance...');
-    const server = new Server(appFactory, config, database, errorHandler);
+    // Resolve the server instance from the container
+    logger.info('Resolving server instance...');
+    const server = resolve<Server>(Server);
 
     logger.info('Starting server...');
     const info = await server.run();
@@ -34,9 +23,10 @@ async function runServer() {
     logger.info(`Server is successfully running`, {
       port: info.port,
       address: info.address,
-      environment: config.environment,
+      environment: resolve<any>('CoreConfig').environment,
     });
   } catch (error: any) {
+    const logger = resolve<Logger>(loggerToken);
     logger.error('Fatal error during server startup:', {
       error: error.message,
       stack: error.stack,
@@ -46,7 +36,8 @@ async function runServer() {
   }
 }
 
-runServer().catch((error) => {
+bootstrap().catch((error) => {
+  const logger = resolve<Logger>(loggerToken);
   logger.error('Top level error:', {
     error: error.message,
     stack: error.stack,

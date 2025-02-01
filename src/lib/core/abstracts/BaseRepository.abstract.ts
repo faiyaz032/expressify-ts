@@ -1,21 +1,29 @@
 import { DocumentType } from '@typegoose/typegoose';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
+import { injectable } from 'tsyringe';
+import { resolve } from '../../../registry';
 import CustomError from '../../../shared/error-handling/CustomError';
-import logger from '../../../shared/logger';
+import { Logger } from '../../../shared/logger/Logger';
 import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
+import { loggerToken } from '../../../shared/tokens';
 import { calculatePagination } from '../../../shared/utils/calculatePagination';
 import { PaginatedResult, TypegooseModel } from '../types/common.types';
 
-export abstract class BaseRepository<T> {
-  protected constructor(protected readonly model: TypegooseModel<T>) {}
+@injectable()
+export class BaseRepository<T> {
+  protected readonly logger: Logger;
+
+  constructor(protected readonly model: TypegooseModel<T>) {
+    this.logger = resolve<Logger>(loggerToken);
+  }
 
   async create(data: Omit<T, '_id'>): Promise<DocumentType<T>> {
     try {
       const newDocument = new this.model(data);
       return (await newDocument.save()) as DocumentType<T>;
     } catch (error: any) {
-      logger.error(`Failed to create document: ${error.message}`, { error });
+      this.logger.error(`Failed to create document: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to create document. Please try again later.');
     }
   }
@@ -24,7 +32,7 @@ export abstract class BaseRepository<T> {
     try {
       return (await this.model.findById(id).exec()) as DocumentType<T> | null;
     } catch (error: any) {
-      logger.error(`Failed to find document by id: ${error.message}`, { error });
+      this.logger.error(`Failed to find document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to find document. Please try again later.');
     }
   }
@@ -33,7 +41,7 @@ export abstract class BaseRepository<T> {
     try {
       return (await this.model.findOne(query).exec()) as DocumentType<T> | null;
     } catch (error: any) {
-      logger.error(`Failed to find document: ${error.message}`, { error });
+      this.logger.error(`Failed to find document: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to find document. Please try again later.');
     }
   }
@@ -42,7 +50,7 @@ export abstract class BaseRepository<T> {
     try {
       return (await this.model.findByIdAndUpdate(id, data, { new: true }).exec()) as DocumentType<T> | null;
     } catch (error: any) {
-      logger.error(`Failed to update document by id: ${error.message}`, { error });
+      this.logger.error(`Failed to update document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to update document. Please try again later.');
     }
   }
@@ -51,7 +59,7 @@ export abstract class BaseRepository<T> {
     try {
       return (await this.model.findByIdAndDelete(id).exec()) as DocumentType<T> | null;
     } catch (error: any) {
-      logger.error(`Failed to delete document by id: ${error.message}`, { error });
+      this.logger.error(`Failed to delete document by id: ${error.message}`, { error });
       throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to delete document. Please try again later.');
     }
   }

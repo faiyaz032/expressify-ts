@@ -1,20 +1,28 @@
 import dotenv from 'dotenv-flow';
 import express, { Application, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import 'reflect-metadata';
+import { inject, singleton } from 'tsyringe';
+import { Logger } from 'winston';
 import '../configs';
+import { registerControllers } from '../lib/core';
 import addRequestId from '../middlewares/addRequestId';
 import { errorLogger } from '../middlewares/errorLogger';
 import globalErrorHandler from '../middlewares/globalErrorHandler';
 import notFoundHandler from '../middlewares/notFoundHandler';
 import requestLogger from '../middlewares/requestLogger';
 import loadAllModules from '../modules';
+import ProductController from '../modules/products/product.controller';
 import AppErrorHandler from '../shared/error-handling';
-import logger from '../shared/logger';
+import { loggerToken } from '../shared/tokens';
 import sendResponse from '../shared/utils/sendResponse';
 
+@singleton()
 class AppFactory {
+  constructor(@inject(loggerToken) private readonly logger: Logger) {}
   createApp(errorHandler: AppErrorHandler): Application {
-    logger.info('Creating app...');
+    this.logger.info('Creating app...');
+
     dotenv.config();
     const app = express();
 
@@ -36,6 +44,7 @@ class AppFactory {
       });
     });
 
+    registerControllers(app, [ProductController]);
     const router = express.Router();
     loadAllModules(router);
     app.use('/api/v1', router);
