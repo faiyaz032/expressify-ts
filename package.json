@@ -1,14 +1,14 @@
 {
   "name": "expressify-ts",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",
-    "start": "cross-env NODE_ENV=production node --trace-warnings ./dist/src/index.js",
-    "start:debug": "cross-env NODE_ENV=production node --trace-warnings --inspect ./dist/src/index.js",
+    "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register --respawn ./src/index.ts",
+    "start": "cross-env NODE_ENV=production node -r tsconfig-paths/register --trace-warnings ./dist/index.js",
+    "start:debug": "cross-env NODE_ENV=production node -r tsconfig-paths/register --trace-warnings --inspect ./dist/index.js",
     "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d"
   },
@@ -32,6 +32,7 @@
     "postgres": "^3.4.4",
     "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7",
+    "tsconfig-paths": "^4.2.0",
     "tsyringe": "^4.8.0",
     "typegoose": "^5.9.1",
     "typeorm": "^0.3.20",

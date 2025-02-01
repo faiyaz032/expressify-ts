@@ -2,9 +2,16 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { injectable } from 'tsyringe';
 import { Controller, Delete, Get, Patch, Post } from '../../lib/core/decorators';
+import { Use } from '../../lib/core/decorators/middleware.decorator';
+import validateResource from '../../middlewares/validateResource';
 import { ObjectIdType } from '../../shared/schemas/objectId.schema';
 import sendResponse from '../../shared/utils/sendResponse';
-import { CreateProductType } from './product.schema';
+import {
+  createProductSchema,
+  CreateProductType,
+  getAllProductsQuerySchema,
+  GetAllProductsQueryType,
+} from './product.schema';
 import ProductService from './product.service';
 
 @injectable()
@@ -13,14 +20,15 @@ export default class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post('/')
-  async createProduct(req: Request, res: Response) {
-    const data = req.body as CreateProductType;
-    const product = await this.productService.create(data);
+  @Use(validateResource({ body: createProductSchema }))
+  async createProduct(req: Request<{}, {}, CreateProductType>, res: Response) {
+    const product = await this.productService.create(req.body);
     sendResponse(res, StatusCodes.CREATED, 'Product created successfully', product);
   }
 
   @Get('/')
-  async getAllProducts(req: Request, res: Response) {
+  @Use(validateResource({ query: getAllProductsQuerySchema }))
+  async getAllProducts(req: Request<{}, {}, {}, GetAllProductsQueryType>, res: Response) {
     const result = await this.productService.getAll(req.query);
     sendResponse(res, StatusCodes.OK, 'Products retrieved successfully', result.data, result.pagination);
   }

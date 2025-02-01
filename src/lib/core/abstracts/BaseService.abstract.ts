@@ -1,14 +1,14 @@
+import { BaseRepository } from '@lib/core/abstracts/BaseRepository.abstract';
+import { PaginatedResult } from '@lib/core/types/common.types';
+import CustomError from '@shared/error-handling/CustomError';
+import { ObjectIdType } from '@shared/schemas/objectId.schema';
+import { loggerToken } from '@shared/tokens';
 import { DocumentType } from '@typegoose/typegoose';
 import { logger } from '@typegoose/typegoose/lib/logSettings';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
+import { resolve } from 'registry';
 import { Logger } from 'winston';
-import { resolve } from '../../../registry';
-import CustomError from '../../../shared/error-handling/CustomError';
-import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
-import { loggerToken } from '../../../shared/tokens';
-import { PaginatedResult } from '../types/common.types';
-import { BaseRepository } from './BaseRepository.abstract';
 
 export default abstract class BaseService<T> {
   protected readonly logger: Logger;

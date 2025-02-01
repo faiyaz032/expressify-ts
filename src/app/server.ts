@@ -1,11 +1,12 @@
+import AppFactory from '@app/app';
+import Database from '@shared/database';
+import AppErrorHandler from '@shared/error-handling';
+import { Logger } from '@shared/logger/Logger';
+import { loggerToken } from '@shared/tokens';
 import { Application } from 'express';
 import { createServer, Server as HTTPServer } from 'http';
+
 import { inject, singleton } from 'tsyringe';
-import Database from '../shared/database';
-import AppErrorHandler from '../shared/error-handling';
-import { Logger } from '../shared/logger/Logger';
-import { loggerToken } from '../shared/tokens';
-import AppFactory from './app'; // Assuming './app' exports an object with a method `createApp`
 
 interface ServerDto {
   port: number;

@@ -1,5 +1,9 @@
-import { Router } from 'express';
+import { registerControllers } from '@lib/core';
+import { Application } from 'express';
+import ProductController from './products/product.controller';
 
-export default function loadAllModules(apiRouter: Router) {
-  //defineProductsModule(apiRouter);
+export default function loadAllModules(app: Application) {
+  const controllerRegistry = [ProductController];
+
+  registerControllers(app, controllerRegistry);
 }

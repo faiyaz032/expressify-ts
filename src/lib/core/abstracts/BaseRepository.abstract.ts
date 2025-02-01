@@ -1,14 +1,14 @@
+import { PaginatedResult, TypegooseModel } from '@lib/core/types/common.types';
+import CustomError from '@shared/error-handling/CustomError';
+import { Logger } from '@shared/logger/Logger';
+import { ObjectIdType } from '@shared/schemas/objectId.schema';
+import { loggerToken } from '@shared/tokens';
+import { calculatePagination } from '@shared/utils/calculatePagination';
 import { DocumentType } from '@typegoose/typegoose';
 import { StatusCodes } from 'http-status-codes';
 import { FilterQuery } from 'mongoose';
+import { resolve } from 'registry';
 import { injectable } from 'tsyringe';
-import { resolve } from '../../../registry';
-import CustomError from '../../../shared/error-handling/CustomError';
-import { Logger } from '../../../shared/logger/Logger';
-import { ObjectIdType } from '../../../shared/schemas/objectId.schema';
-import { loggerToken } from '../../../shared/tokens';
-import { calculatePagination } from '../../../shared/utils/calculatePagination';
-import { PaginatedResult, TypegooseModel } from '../types/common.types';
 
 @injectable()
 export class BaseRepository<T> {
