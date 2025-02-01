@@ -6,7 +6,6 @@ import Server from './app/server';
 import configs from './configs';
 import Database from './shared/database';
 import AppErrorHandler from './shared/error-handling';
-import logger from './shared/logger';
 import { Logger } from './shared/logger/Logger';
 import { loggerToken } from './shared/tokens';
 
@@ -111,10 +110,8 @@ export function registerDependencies() {
 
     // Register optional services
     registerEmailService();
-
-    logger.info('Dependencies registered successfully');
   } catch (error: any) {
-    logger.error('Failed to register dependencies', {
+    console.error('Failed to register dependencies', {
       error: error.message,
       stack: error.stack,
     });

@@ -1,7 +1,10 @@
 import { Application, NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
+import { resolve } from '../registry';
 import AppErrorHandler from '../shared/error-handling';
-import logger from '../shared/logger';
+import { Logger } from '../shared/logger/Logger';
+import { loggerToken } from '../shared/tokens';
 
 interface ResponseData {
   success: boolean;
@@ -36,7 +39,7 @@ export default function globalErrorHandler(expressApp: Application, errorHandler
       requestId: res.get('X-Request-Id'),
     };
     // Log the error details
-    logger.logError(error, requestId, req);
+    resolve<Logger>(loggerToken).logError(error, requestId, req);
     // Check if NODE_ENV is set to 'development'
     if (process.env.NODE_ENV === 'development') {
       // Include stack trace in response

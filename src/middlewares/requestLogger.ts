@@ -1,7 +1,9 @@
 // middleware/requestLogger.ts
 import { NextFunction, Response } from 'express';
 
-import logger from '../shared/logger';
+import { resolve } from '../registry';
+import { Logger } from '../shared/logger/Logger';
+import { loggerToken } from '../shared/tokens';
 import { RequestWithId } from './addRequestId';
 
 export default function requestLogger(req: RequestWithId, res: Response, next: NextFunction) {
@@ -30,7 +32,7 @@ export default function requestLogger(req: RequestWithId, res: Response, next: N
     const responseTime = Date.now() - start;
 
     // Use the custom logRequest method with request ID and additional info
-    logger.logRequest(req, res, responseTime, requestId);
+    resolve<Logger>(loggerToken).logRequest(req, res, responseTime, requestId);
   };
 
   next();
